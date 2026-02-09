@@ -1,0 +1,37 @@
+name: Deploy React to S3
+
+on:
+  push:
+    branches:
+      - main   # deploy on push to main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: frontend
+
+      - name: Build React
+        run: npm run build
+        working-directory: frontend
+
+      - name: Deploy to S3
+        uses: aws-actions/s3-sync@v2
+        with:
+          source-dir: frontend/build
+          bucket: YOUR_BUCKET_NAME
+          region: YOUR_REGION
+          delete: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
